@@ -1,0 +1,389 @@
+{
+  "name": "d2c-ai-creative-diversity-engine",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "D2C AI Creative Generator",
+        "formDescription": "Enter a product URL to generate product-specific creative concepts.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "product_url",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -1120,
+        -576
+      ],
+      "id": "a17fd681-ddaf-479d-bbdd-160f42e2b5ff",
+      "name": "enter_product_url",
+      "webhookId": "db07e36a-1014-45ff-977f-9c67de815d74"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.product_url}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -928,
+        -368
+      ],
+      "id": "4df41f4f-07ca-4631-b437-8bf7b1f1fdf7",
+      "name": "extract_htmlContent"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a D2C product intelligence analyst.\n\nAnalyze the product page content provided below.\n\nExtract ONLY information supported by the content.\nDo not invent anything.\n\nReturn valid JSON only.\n\n{\n  \"product_name\": \"\",\n  \"brand\": \"\",\n  \"category\": \"\",\n  \"price\": \"\",\n  \"description\": \"\",\n  \"features\": [],\n  \"benefits\": [],\n  \"materials\": [],\n  \"colors\": [],\n  \"use_cases\": [],\n  \"proof_points\": [],\n  \"claims\": [],\n  \"target_customer_hints\": [],\n  \"objections_visible_from_page\": []\n}\n\nPRODUCT PAGE CONTENT:\n\n{{ $json.product_text }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -368
+      ],
+      "id": "00e7a539-0fd6-4e82-9dd0-acc225a1000a",
+      "name": "Product Intelligence",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5XlcIk5WuMA8rV7S",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a senior D2C customer research strategist.\n\nUsing the product intelligence below, identify the most plausible customer motivations and buying psychology for this product.\n\nDo not invent reviews, market data, customer quotes, demographics, or facts that are not supported by the product information.\n\nWe need insights that can later be converted into genuinely different creative strategies.\n\nReturn valid JSON only.\n\nRequired structure:\n\n{\n  \"primary_customer\": \"\",\n  \"customer_motivations\": [],\n  \"functional_problems\": [],\n  \"emotional_problems\": [],\n  \"functional_desires\": [],\n  \"emotional_desires\": [],\n  \"purchase_triggers\": [],\n  \"objections\": [],\n  \"alternatives\": [],\n  \"jobs_to_be_done\": [],\n  \"messaging_opportunities\": []\n}\n\nRules:\n- Keep insights specific to this product.\n- Avoid generic statements such as \"customers want quality\".\n- Separate functional and emotional motivations.\n- Do not create final ad copy.\n- messaging_opportunities should be strategic directions only.\n- Return JSON only.\n\nPRODUCT INTELLIGENCE:\n\n{{$node[\"Product Intelligence\"].json.content.parts[0].text}}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -368
+      ],
+      "id": "af7269f7-dc8b-4a05-b421-48e4ca8b298f",
+      "name": "Customer Intelligence",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5XlcIk5WuMA8rV7S",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a senior D2C creative strategist.\n\nUsing the customer intelligence and product intelligence provided below, develop 4 genuinely different creative territories for this product.\n\nIMPORTANT:\nDo not create 4 versions of the same idea.\nEach territory must represent a meaningfully different reason why the customer might care about or buy the product.\n\nThe territories should differ in:\n- customer motivation\n- problem or desire\n- messaging mechanism\n- product proof\n- visual storytelling direction\n\nPrioritize strategic diversity over quantity.\n\nReturn valid JSON only in this structure:\n\n{\n  \"creative_territories\": [\n    {\n      \"angle_id\": \"ANGLE_01\",\n      \"angle_name\": \"\",\n      \"core_insight\": \"\",\n      \"customer_motivation\": \"\",\n      \"customer_problem\": \"\",\n      \"customer_desire\": \"\",\n      \"strategic_promise\": \"\",\n      \"product_proof\": [],\n      \"messaging_mechanism\": \"\",\n      \"visual_territory\": \"\",\n      \"recommended_formats\": [],\n      \"funnel_stage\": \"\",\n      \"why_this_angle_is_distinct\": \"\"\n    },\n    {\n      \"angle_id\": \"ANGLE_02\",\n      \"angle_name\": \"\",\n      \"core_insight\": \"\",\n      \"customer_motivation\": \"\",\n      \"customer_problem\": \"\",\n      \"customer_desire\": \"\",\n      \"strategic_promise\": \"\",\n      \"product_proof\": [],\n      \"messaging_mechanism\": \"\",\n      \"visual_territory\": \"\",\n      \"recommended_formats\": [],\n      \"funnel_stage\": \"\",\n      \"why_this_angle_is_distinct\": \"\"\n    },\n    {\n      \"angle_id\": \"ANGLE_03\",\n      \"angle_name\": \"\",\n      \"core_insight\": \"\",\n      \"customer_motivation\": \"\",\n      \"customer_problem\": \"\",\n      \"customer_desire\": \"\",\n      \"strategic_promise\": \"\",\n      \"product_proof\": [],\n      \"messaging_mechanism\": \"\",\n      \"visual_territory\": \"\",\n      \"recommended_formats\": [],\n      \"funnel_stage\": \"\",\n      \"why_this_angle_is_distinct\": \"\"\n    },\n    {\n      \"angle_id\": \"ANGLE_04\",\n      \"angle_name\": \"\",\n      \"core_insight\": \"\",\n      \"customer_motivation\": \"\",\n      \"customer_problem\": \"\",\n      \"customer_desire\": \"\",\n      \"strategic_promise\": \"\",\n      \"product_proof\": [],\n      \"messaging_mechanism\": \"\",\n      \"visual_territory\": \"\",\n      \"recommended_formats\": [],\n      \"funnel_stage\": \"\",\n      \"why_this_angle_is_distinct\": \"\"\n    }\n  ]\n}\n\nRules:\n- Do not write final ad copy.\n- Do not create superficial variations of the same angle.\n- Do not invent product features or claims.\n- Every angle must be supported by the available product/customer information.\n- Avoid generic territories such as \"quality\", \"best product\", or \"premium\" unless there is a specific product proof supporting that direction.\n- Each angle should be usable to create multiple distinct static ad concepts later.\n- Return JSON only.\n\nCUSTOMER INTELLIGENCE:\n\n{{$node[\"Customer Intelligence\"].json.content.parts[0].text}}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -368
+      ],
+      "id": "a4b6e4f8-8a9d-4d92-9ce7-463891928692",
+      "name": "Creative Territory Generator",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5XlcIk5WuMA8rV7S",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw =\n  $json.content?.parts?.[0]?.text ??\n  $json.text ??\n  $json;\n\nlet parsed = raw;\n\nif (typeof raw === 'string') {\n  const cleaned = raw\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/```$/i, '')\n    .trim();\n\n  parsed = JSON.parse(cleaned);\n}\n\nconst territories = parsed.creative_territories || [];\n\nif (!Array.isArray(territories) || territories.length === 0) {\n  throw new Error('No creative territories found in Gemini output');\n}\n\n// Get the original product image URL from the HTML extraction node\nconst ogImage = $('Extract Product Page').first().json.og_image;\n\nif (!ogImage) {\n  throw new Error('og_image not found in Extract Product Page');\n}\n\n// Create one n8n item per creative territory\nreturn territories.map((territory, index) => ({\n  json: {\n    creative_index: index + 1,\n    creative_id: `ANGLE_${String(index + 1).padStart(2, '0')}`,\n    og_image: ogImage,\n    ...territory\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        -176
+      ],
+      "id": "3c4a57a7-697a-4e7f-9c52-b63af0dae2bd",
+      "name": "Split Creative Territories"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.og_image}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -416,
+        -656
+      ],
+      "id": "355d8217-d739-462b-9696-05294b65814e",
+      "name": "Download Product Image"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "product_text",
+              "cssSelector": "body"
+            },
+            {
+              "key": "product_images",
+              "cssSelector": "img",
+              "returnValue": "attribute",
+              "attribute": "src",
+              "returnArray": true
+            },
+            {
+              "key": "image_data_src",
+              "cssSelector": "img",
+              "returnValue": "attribute",
+              "attribute": "data-src",
+              "returnArray": true
+            },
+            {
+              "key": "image_srcset",
+              "cssSelector": "img",
+              "returnValue": "attribute",
+              "attribute": "srcset",
+              "returnArray": true
+            },
+            {
+              "key": "og_image",
+              "cssSelector": "meta[property=\"og:image\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -624,
+        -464
+      ],
+      "id": "2e32cf47-1d91-4475-ac74-3f9740bdcbb0",
+      "name": "Extract Product Page"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.og_image}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1072,
+        -48
+      ],
+      "id": "92d58e9d-9fa8-4e58-87c7-4a08622aa110",
+      "name": "Download Product Image for each angle"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "edit",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-image",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-image (Nano Banana 2)"
+        },
+        "prompt": "=Create a high-quality static D2C advertisement using the provided product image as the PRIMARY PRODUCT REFERENCE.\n\nIMPORTANT PRODUCT CONSISTENCY RULES:\n- Use the exact product shown in the reference image.\n- Preserve the product's exact shape, design, color, material, proportions, construction and distinctive details.\n- Do not redesign, replace, recolor, simplify or invent the product.\n- The product must remain the hero of the advertisement.\n- Do not create a different product.\n- Do not add unsupported product features or claims.\n\nCREATIVE STRATEGY:\n\nAngle:\n{{$json.angle_name}}\n\nCore Insight:\n{{$json.core_insight}}\n\nCustomer Motivation:\n{{$json.customer_motivation}}\n\nStrategic Promise:\n{{$json.strategic_promise}}\n\nVisual Territory:\n{{$json.visual_territory}}\n\nProduct Proof:\n{{ JSON.stringify($json.product_proof) }}\n\nRecommended Format:\nStatic social media advertisement.\n\nCREATIVE DIRECTION:\nBuild a visually strong, premium D2C static ad around this specific creative angle.\n\nThe visual composition should be meaningfully different from a generic product listing image while keeping the exact original product intact.\n\nUse:\n- strong visual hierarchy\n- clean composition\n- clear focal point\n- appropriate negative space for messaging\n- realistic lighting\n- professional e-commerce advertising aesthetics\n\nTEXT:\nGenerate concise advertising copy that directly supports the supplied strategic angle.\nDo not use generic filler text.\nDo not make claims that are not supported by the product information.\n\nThe final image should look like a finished paid-social advertisement, not an AI mockup or product catalog page.\n\nDo not include:\n- fake logos\n- fake reviews\n- fake statistics\n- fake badges\n- unsupported claims\n- watermarks",
+        "images": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        -48
+      ],
+      "id": "3263e10c-b90a-48a5-b392-0426968844ed",
+      "name": "Edit an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5XlcIk5WuMA8rV7S",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "enter_product_url": {
+      "main": [
+        [
+          {
+            "node": "extract_htmlContent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract_htmlContent": {
+      "main": [
+        [
+          {
+            "node": "Extract Product Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Customer Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Creative Territory Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creative Territory Generator": {
+      "main": [
+        [
+          {
+            "node": "Split Creative Territories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Creative Territories": {
+      "main": [
+        [
+          {
+            "node": "Download Product Image for each angle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Product Image": {
+      "main": [
+        [
+          {
+            "node": "Product Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Product Page": {
+      "main": [
+        [
+          {
+            "node": "Download Product Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Product Image for each angle": {
+      "main": [
+        [
+          {
+            "node": "Edit an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "53f561e5-caca-4883-b2b6-ecee79681d0b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e645604217a9351911d167e473d52c45e8170536cf103124f95ffe879cf73343"
+  },
+  "nodeGroups": [],
+  "id": "BrBGF2sp0dPgUeqV",
+  "tags": []
+}
